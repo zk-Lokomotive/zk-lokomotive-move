@@ -8,7 +8,7 @@ import useNetworkConfig from '~~/hooks/useNetworkConfig'
 const Footer = () => {
   const { useNetworkVariable } = useNetworkConfig()
   const explorerUrl = useNetworkVariable(EXPLORER_URL_VARIABLE_NAME)
-  
+
 
   return (
     <footer className="flex w-full flex-col flex-wrap items-center justify-between gap-3 p-3 px-3 py-3 sm:flex-row">
@@ -36,7 +36,7 @@ const Footer = () => {
           rel="noopener noreferrer"
           highContrast={true}
         >
-          @kkomelin
+          @zkLokomotive
         </Link>
         <span>·</span>
         <Link
