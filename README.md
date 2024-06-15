@@ -1,5 +1,28 @@
 # zk-lokomotive Sui
 
+### Encrypting the File:
+First, encrypt the file using zkSNARKs to ensure privacy and security. zkSNARKs allow you to prove the file’s integrity without revealing its contents.
+Upload the encrypted file to a decentralized storage solution like Arweave, obtaining a unique file hash.
+
+### Tokenizing the File Hash:
+Create a token representing the file hash. This involves wrapping the hash into a token that can be transferred across different blockchain networks.
+Use smart contracts to mint this token on the Sui network.
+
+### Using the Wormhole Bridge:
+Wormhole is a cross-chain bridge that facilitates the transfer of tokenized assets between different blockchains, including Sui and Solana.
+The process involves locking the tokenized file hash on the Sui network and minting an equivalent token on the Solana network.
+Guardians (validators) on the Wormhole network monitor the lock and mint actions to ensure they are synchronized across chains.
+
+### Transmitting the Tokenized File Hash:
+Initiate the transfer of the tokenized file hash from the Sui network to the Solana network using the Wormhole bridge.
+The Wormhole protocol ensures the secure and verified transmission of the tokenized asset between networks.
+
+### Verification and Access on Solana:
+On the Solana side, the recipient can use the token to retrieve the file hash.
+Verify the file hash against the encrypted file stored on Arweave to ensure integrity and authenticity.
+
+
+
 ## Prerequisites
 
 Before you begin, install the following:
