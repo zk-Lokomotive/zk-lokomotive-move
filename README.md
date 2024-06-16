@@ -1,5 +1,5 @@
 # zk-lokomotive Sui
-* Zk based fully secure and trustless multichain file transfer system with Sui-Solana-Wormhole.
+* Zk based fully secure and trustless multichain file transfer system with Sui-EVM-Wormhole.
 
 
 ### [Solana Renaissance Hackathon Wormhole Best Multichain Track Winner 1st 😎🥇](https://earn.superteam.fun/listings/hackathon/build-multichain-apps-using-wormhole/) 
@@ -23,6 +23,10 @@ Our project aims to enable secure, private, and efficient file transfers across 
 Traditional file transfer methods often suffer from privacy and security vulnerabilities. Centralized servers are prone to data breaches, and current blockchain solutions lack seamless interoperability.
 
 ## **2. Objectives**
+
+### Demo Architecture
+![Architecture](https://github.com/zk-Lokomotive/zk-lokomotive-sui/assets/158029357/fac7287e-a440-4afe-95e6-6dd008811240)
+
 - Encrypt files using zkSNARKs to ensure privacy and integrity.
 - Store encrypted files on Arweave with a unique file hash.
 - Tokenize the file hash for transfer across blockchain networks.
