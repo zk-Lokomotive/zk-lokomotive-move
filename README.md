@@ -16,8 +16,7 @@ Author: [Baturalp Güvenç](https://github.com/virjilakrum)
 
 ### **Demo Video (Sui-Avalanche)**
 
-WATCH THE DEMO VIDEO
-
+[WATCH THE DEMO VIDEO](https://youtu.be/WpamMm3GP8U)
 ## **1. Introduction**
 ### **1.1 Project Overview**
 Our project aims to enable secure, private, and efficient file transfers across different blockchain networks. Utilizing zkSNARKs for encryption, Arweave for decentralized storage, and the Wormhole bridge for cross-chain token transfer, we ensure that files can be shared securely from Sui to Solana networks.
