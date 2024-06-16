@@ -1,5 +1,6 @@
+'use client';
 import styles from "./core.module.scss";
-import { ethers } from "ethers";
+import { Wallet, ethers } from "ethers";
 import { useEffect, useState } from "react";
 
 import SignalingChannel from "../../webrtc/signaling-channel";
@@ -9,9 +10,12 @@ import { WalletNotConnectedError } from '@solana/wallet-adapter-base';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { Keypair, SystemProgram, Transaction } from '@solana/web3.js';
 import React, { FC, useCallback } from 'react';
-
-
-const _gvars = {};
+import { createHelia } from "helia";
+import _gvars from "../../globals";
+import WalletConnectionButton from "components/walletConnBtn/WalletConnectionButton";
+//
+//
+//const _gvars = {};
 export default function Core() {
     const [isMetaMaskInstalled, setIsMetaMaskInstalled] = useState(false);
     const [isMetaMaskLoggedIn, setIsMetaMaskLoggedIn] = useState(false);
@@ -36,7 +40,7 @@ export default function Core() {
     }, []);
 
     const checkMetaMaskInstalled = () => {
-        if (typeof window.ethereum !== "undefined") {
+        if (typeof window.solana !== "undefined") {
             setIsMetaMaskInstalled(true);
         } else {
             setIsMetaMaskInstalled(false);
@@ -44,19 +48,7 @@ export default function Core() {
     };
 
     const checkMetaMaskLoggedIn = async () => {
-        if (isMetaMaskInstalled) {
-            try {
-                const accounts = await window.ethereum.request({ method: "eth_accounts" });
-                if (accounts.length > 0) {
-                    setOurId(accounts[0]);
-                    setIsMetaMaskLoggedIn(true);
-                } else {
-                    setIsMetaMaskLoggedIn(false);
-                }
-            } catch (error) {
-                console.error("Error checking MetaMask login:", error);
-            }
-        }
+        return _gvars._gvars.isConnected;
     };
 
     const handleLogin = async () => {
@@ -102,20 +94,20 @@ export default function Core() {
 
         }
     }
+    if (_gvars._gvars.isConnected) {
+        if (!isMetaMaskLoggedIn) {
+            setIsMetaMaskLoggedIn(true);
+            setIsMetaMaskInstalled(true);
+        }
+    }
     return (
         <div className={styles.core_root}>
             <div className={[styles.core_you, getYouClass()].join(' ')}>
                 {isMetaMaskInstalled && !isMetaMaskLoggedIn && (
-                    <button onClick={() => {
-                        solana.connect().then((x) => {
-                            console.log(x.publicKey.toBase58());
-                            _gvars.wallet = x;
-                        setOurId(x.publicKey.toBase58());
-                            setIsMetaMaskLoggedIn(true);
-                    });
-                    }}>
-                        Connect to a solana wallet
-                    </button>
+                    <WalletConnectionButton onclick={() => {
+                        setIsMetaMaskInstalled(true);
+                        setIsMetaMaskLoggedIn(true);
+                    }} />
                 )}
                 {isMetaMaskInstalled && isMetaMaskLoggedIn && coreState == 0 && <div className={styles.selection}>
                     <div onClick={
@@ -137,8 +129,7 @@ export default function Core() {
                             const signalingServerUrl = "https://cinnamon.heatwavealien.dev:" + port;
                             // Token must match the value defined in the .env filed inside the config directory
                             const token = "SIGNALING123";
-                            console.log(ourId)
-                            const channel = new SignalingChannel(ourId, signalingServerUrl, token);
+                            const channel = new SignalingChannel(_gvars.wallet, signalingServerUrl, token);
                             var rawFileBytes = []
 
                             channel.onMessage = async (message) => {
@@ -158,15 +149,10 @@ export default function Core() {
                                                 true,
                                                 ["encrypt", "decrypt"]
                                             );
-                                            const publicKey = await window.crypto.subtle.exportKey("spki", rsaKeyPair.publicKey);
-                                            const privateKey = await window.crypto.subtle.exportKey("pkcs8", rsaKeyPair.privateKey);
 
-                                            const privateKeyBytes = new Uint8Array(privateKey);
-                                            localStorage.setItem("privateKey", JSON.stringify(Array.from(privateKeyBytes)));
-                                            setpubKey(publicKey);
-                                            setprivKey(privateKey);
-                                            setRSAkeyInstance(rsaKeyPair);
+                                            _gvars.rsaKeyPair = rsaKeyPair;
                                             setCoreMessage("Sending sender the public key");
+                                            const publicKey = await window.crypto.subtle.exportKey("spki", rsaKeyPair.publicKey);
                                             channel.sendTo(target, { type: "rsaPub", rsaPublicKey: publicKey });
                                             setCoreMessage("Awaiting response");
                                             break;
@@ -176,19 +162,8 @@ export default function Core() {
                                             const encryptedAesKey = message.message.aesKey;
                                             const encryptedIV = message.message.aesIV;
 
-                                            const storedPrivateKey = JSON.parse(localStorage.getItem("privateKey"));
-                                            const pkBytes = new Uint8Array(storedPrivateKey);
-                                            const importedPrivateKey = await window.crypto.subtle.importKey(
-                                                "pkcs8",
-                                                pkBytes,
-                                                {
-                                                    name: "RSA-OAEP",
-                                                    hash: { name: "SHA-256" },
-                                                },
-                                                true,
-                                                ["decrypt"]
-                                            );
-                                            const RSAkeyInstance = importedPrivateKey;
+                                            const RSAkeyInstance = _gvars.rsaKeyPair;
+                                            console.log(RSAkeyInstance);
 
 
                                             const decryptedAesKey = await window.crypto.subtle.decrypt(
@@ -196,27 +171,22 @@ export default function Core() {
                                                     name: "RSA-OAEP",
                                                     hash: { name: "SHA-256" },
                                                 },
-                                                RSAkeyInstance,
+                                                RSAkeyInstance.privateKey,
                                                 encryptedAesKey
                                             );
-                                            console.log(encryptedAesKey);
-                                            console.log(encryptedIV);
-                                            setAesKey(decryptedAesKey);
+                                            console.log("DECRYPTED!")
+                                            console.log(decryptedAesKey);
+                                            _gvars.aesKey = decryptedAesKey;
+
                                             const decryptedIV = await window.crypto.subtle.decrypt(
                                                 {
                                                     name: "RSA-OAEP",
                                                     hash: { name: "SHA-256" },
                                                 },
-                                                RSAkeyInstance,
+                                                RSAkeyInstance.privateKey,
                                                 encryptedIV,
                                             );
-                                            setAesIV(decryptedIV);
-                                            console.log("Decrypted key and IV");
-                                            console.log(decryptedAesKey);
-                                            console.log(decryptedIV);
-                                            localStorage.setItem("aesKey", JSON.stringify(Array.from(decryptedAesKey)));
-                                            localStorage.setItem("aesIV", JSON.stringify(Array.from(decryptedIV)));
-
+                                            _gvars.aesIV = decryptedIV;
                                             setCoreMessage("Awaiting partner to send file hash");
                                             channel.sendTo(target, { type: "recvReady" });
                                             break;
@@ -292,25 +262,21 @@ export default function Core() {
                                                     offset += item.length;
                                                 });
                                                 console.log("Concated array length: " + mergedArray.length);
-                                                const storedAesKey = await JSON.parse(await localStorage.getItem("aesKey"));
-                                                const storedAesIV = await JSON.parse(await localStorage.getItem("aesIV"));
+                                                const storedAesKey = _gvars.aesKey
+                                                const storedAesIV = _gvars.aesIV;
                                                 console.log(storedAesKey);
                                                 console.log(storedAesIV);
+                                                let decryptedFile;
                                                 try {
 
-                                                    aesKey = await window.crypto.subtle.importKey(
-                                                        "raw",
-                                                        new Uint8Array(storedAesKey),
-                                                        {
-                                                            name: "AES-GCM"
-                                                        },
-                                                        false,
-                                                        ["decrypt"]
-                                                    );
+                                                    aesKey = await window.crypto.subtle.importKey("raw", storedAesKey, "AES-GCM", true, [
+                                                        "encrypt",
+                                                        "decrypt",
+                                                    ]);
                                                     aesIV = new Uint8Array(storedAesIV);
                                                     console.log("Grabbed aeskey:");
                                                     console.log(aesKey);
-                                                    const decryptedFile = await window.crypto.subtle.decrypt(
+                                                    decryptedFile = await window.crypto.subtle.decrypt(
                                                         {
                                                             name: "AES-GCM",
                                                             iv: aesIV
@@ -320,9 +286,10 @@ export default function Core() {
                                                     );
                                                 }
                                                 catch {
-
+                                                    console.log("Error decrypting file");
                                                 };
-                                                blob = new Blob([mergedArray], { type: 'application/octet-stream' });
+                                                console.log("Successful Decryption!");
+                                                blob = new Blob([decryptedFile], { type: 'application/octet-stream' });
 
                                                 url = URL.createObjectURL(blob);
                                                 link = document.createElement('a');
@@ -376,11 +343,11 @@ export default function Core() {
                             const receiverInput = document.querySelector('input[type="text"]');
                             console.log("File handle");
                             console.log(file);
-
+                            _gvars.receiver = receiverInput.value;
 
                             setReceiver(receiverInput.value);
 
-                            //Instead of using the signaling server to transfer the damn file, we can use IPFS to store the file and send the hash to the receiver
+
 
 
                             // Where the signaling server is hosted, for a local server the port must match the one set in the .env files inside the config directory
@@ -388,8 +355,10 @@ export default function Core() {
                             const signalingServerUrl = "https://cinnamon.heatwavealien.dev:" + port;
                             // Token must match the value defined in the .env filed inside the config directory
                             const token = "SIGNALING123";
-                            console.log(receiver, signalingServerUrl, token)
-                            const channel = new SignalingChannel(window.ethereum.selectedAddress, signalingServerUrl, token);
+                            console.log(_gvars.receiver)
+                            console.log(signalingServerUrl)
+                            console.log(token)
+                            const channel = new SignalingChannel(_gvars.wallet, signalingServerUrl, token);
                             channel.onMessage = async (message) => {
                                 let pardner = message.from;
                                 console.log(message);
@@ -398,6 +367,7 @@ export default function Core() {
                                         case "rsaPub":
                                             setCoreMessage("Encrypting AES key");
                                             const rsaPublicKey = message.message.rsaPublicKey;
+                                            console.log(rsaPublicKey);
                                             const rsaInstance = await window.crypto.subtle.importKey(
                                                 "spki",
                                                 rsaPublicKey,
@@ -412,7 +382,13 @@ export default function Core() {
                                             console.log(rsaPublicKey);
                                             const aesKey = crypto.randomBytes(32);
                                             const aesIV = crypto.randomBytes(16);
-
+                                            _gvars.aesKey = aesKey;
+                                            _gvars.aesIV = aesIV;
+                                            const aesInstance = await window.crypto.subtle.importKey("raw", aesKey, "AES-GCM", true, [
+                                                "encrypt",
+                                                "decrypt",
+                                            ]);
+                                            _gvars.aesInstance = aesInstance;
                                             const encryptedAesKey = await window.crypto.subtle.encrypt(
                                                 {
                                                     name: "RSA-OAEP",
@@ -429,12 +405,8 @@ export default function Core() {
                                                 rsaInstance,
                                                 aesIV.buffer
                                             );
-                                            //const encryptedIVBase64 = window.btoa(String.fromCharCode(...new Uint8Array(encryptedIV)));
-                                            //const encryptedAesKeyBase64 = window.btoa(String.fromCharCode(...new Uint8Array(encryptedAesKey)));
-                                            setAesKey(aesKey);
-                                            setAesIV(aesIV);
-                                            localStorage.setItem("aesKey", JSON.stringify(Array.from(aesKey)));
-                                            localStorage.setItem("aesIV", JSON.stringify(Array.from(aesIV)));
+                                            _gvars.aesKey = aesKey;
+                                            _gvars.aesIV = aesIV;
                                             setCoreMessage("Sending encrypted AES key");
                                             console.log(pardner);
                                             channel.sendTo(pardner, { type: "encryptedAesKey", aesKey: encryptedAesKey, aesIV: encryptedIV });
@@ -444,47 +416,27 @@ export default function Core() {
                                             setCoreMessage("Encrypting and sending file");
                                             const fileReader = new FileReader();
                                             fileReader.onload = async (e) => {
-                                                const storedAesKey = localStorage.getItem("aesKey");
-                                                const storedAesIV = localStorage.getItem("aesIV");
-                                                let aesIVBuffer;
 
-                                                let importedAesKey;
-                                                if (storedAesKey && storedAesIV) {
-                                                    const aesKeyBuffer = new Uint8Array(JSON.parse(storedAesKey));
-                                                    aesIVBuffer = new Uint8Array(JSON.parse(storedAesIV));
-                                                    importedAesKey = await window.crypto.subtle.importKey(
-                                                        "raw",
-                                                        aesKeyBuffer,
-                                                        { name: "AES-GCM" },
-                                                        false,
-                                                        ["encrypt", "decrypt"]
-                                                    );
-
-                                                } else {
-                                                    // Handle case when aesKey and aesIV are not found in localStorage
-                                                    // You can generate new aesKey and aesIV here
-                                                }
                                                 const fileData = e.target.result;
-                                                console.log(importedAesKey);
+                                                const aesKey = _gvars.aesInstance;
                                                 console.log("let the encryption begin");
                                                 const encryptedFile = await window.crypto.subtle.encrypt(
                                                     {
                                                         name: "AES-GCM",
-                                                        iv: aesIVBuffer
+                                                        iv: _gvars.aesIV
                                                     },
-                                                    importedAesKey,
+                                                    aesKey,
                                                     new Uint8Array(fileData)
                                                 );
                                                 console.log("Encrypted");
                                                 setCoreState(5);
                                                 const segmentSize = 1024 * 1024; // 1MB
 
-                                                for (let i = 0; i < fileData.byteLength; i += segmentSize) {
+                                                for (let i = 0; i < encryptedFile.byteLength; i += segmentSize) {
                                                     console.log("Sending chunk");
-                                                    const segment = fileData.slice(i, i + segmentSize);
+                                                    const segment = encryptedFile.slice(i, i + segmentSize);
                                                     const typedArray = new Uint8Array(segment);
                                                     const array = [...typedArray];
-                                                    console.log(segment);
                                                     channel.sendTo(pardner, { type: "fileSegment", segment: array });
                                                 }
                                                 channel.sendTo(pardner, { type: "fileEnd", filename: file.name });

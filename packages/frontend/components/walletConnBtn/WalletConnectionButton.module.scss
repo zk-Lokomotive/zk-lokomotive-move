@@ -1,0 +1,73 @@
+.walletbtnConnect {
+    // Styles for the button when not hovered
+    position: relative;
+    color: #333;
+    padding: 10px;
+    border: none;
+    button {
+        cursor: pointer;
+    }
+    button:hover {
+        
+        color: #aaa;
+    }
+
+    .PopupMenu {
+        display: none;
+        position: absolute;
+    }
+}
+
+.walletbtnConnectConnected {
+    position: relative;
+    cursor: default;
+    &:hover {
+        .PopupMenuConnected {
+            display: flex !important;
+        }
+    }
+
+    .PopupMenuConnected {
+        // Styles for the popup menu
+        //display: flex;
+        border-radius: 10px;
+        flex-direction: column;
+        width: 200px;
+        background-color: #fff;
+        height: fit-content;
+        
+        color: #333;
+        padding: 10px;
+        border: none;
+        position: absolute;
+        top: 60px;
+        right: 0px;
+        left: -20px;
+        z-index: 1000;
+        display: none;
+        
+        
+        .WalletDetails {
+            display: flex;
+            flex-direction: row;
+            
+            &:hover {
+                cursor: pointer;
+                color: #0058a1;
+            }
+            p {
+                margin-left: 10px;
+            }
+        }
+        button {
+            cursor: pointer;
+            color: #333;
+        }
+        button:hover {
+            color: #0058a1;
+        }
+    }
+    .PopupMenuConnected:hover {
+        display: flex;
+    }
+}
