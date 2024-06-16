@@ -14,6 +14,9 @@ Author: [Baturalp Güvenç](https://github.com/virjilakrum)
   <img src="https://github.com/zk-Lokomotive/zk-lokomotive-sui/assets/158029357/e9a98533-894e-4902-9e8c-539d86d0e764" alt="logo" width="200"/>
 </div>
 
+### **Demo Video (Sui-Avalanche)**
+
+WATCH THE DEMO VIDEO
 
 ## **1. Introduction**
 ### **1.1 Project Overview**
