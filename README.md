@@ -19,7 +19,7 @@ Author: [Baturalp Güvenç](https://github.com/virjilakrum)
 [WATCH THE DEMO VIDEO](https://youtu.be/WpamMm3GP8U)
 ## **1. Introduction**
 ### **1.1 Project Overview**
-Our project aims to enable secure, private, and efficient file transfers across different blockchain networks. Utilizing zkSNARKs for encryption, Arweave for decentralized storage, and the Wormhole bridge for cross-chain token transfer, we ensure that files can be shared securely from Sui to Solana networks.
+Our project aims to enable secure, private, and efficient file transfers across different blockchain networks. Utilizing zkSNARKs for encryption, Arweave for decentralized storage, and the Wormhole bridge for cross-chain token transfer, we ensure that files can be shared securely from Sui to EVM networks.
 
 ### **1.2 Problem Statement**
 Traditional file transfer methods often suffer from privacy and security vulnerabilities. Centralized servers are prone to data breaches, and current blockchain solutions lack seamless interoperability.
@@ -32,7 +32,7 @@ Traditional file transfer methods often suffer from privacy and security vulnera
 - Encrypt files using zkSNARKs to ensure privacy and integrity.
 - Store encrypted files on Arweave with a unique file hash.
 - Tokenize the file hash for transfer across blockchain networks.
-- Utilize the Wormhole bridge to securely transfer tokenized assets from Sui to Solana.
+- Utilize the Wormhole bridge to securely transfer tokenized assets from Sui to EVM.
 - Verify and retrieve the file on the receiving network, ensuring the file's integrity.
 
 ## **3. Technology Stack**
@@ -48,9 +48,9 @@ Traditional file transfer methods often suffer from privacy and security vulnera
 - **Purpose:** Cross-chain token transfer.
 - **Benefit:** Facilitates seamless and secure movement of tokenized assets between blockchain networks.
 
-### **3.4 Sui and Solana Networks**
+### **3.4 Sui and EVM Networks**
 - **Sui Network:** Source network for initiating the file transfer.
-- **Solana Network:** Destination network for receiving and verifying the file.
+- **EVM Network:** Destination network for receiving and verifying the file.
 
 ## **4. Process Workflow**
 ### **4.1 Encryption and Storage**
@@ -59,17 +59,17 @@ Traditional file transfer methods often suffer from privacy and security vulnera
 
 ### **4.2 Tokenization and Transfer**
 3. **Tokenize File Hash:** Create a token representing the file hash on the Sui network.
-4. **Initiate Transfer:** Use the Wormhole bridge to lock the token on Sui and mint an equivalent token on Solana.
+4. **Initiate Transfer:** Use the Wormhole bridge to lock the token on Sui and mint an equivalent token on EVM.
 
 ### **4.3 Verification and Retrieval**
-5. **Verify on Solana:** The recipient verifies the file hash against the encrypted file on Arweave.
+5. **Verify on EVM:** The recipient verifies the file hash against the encrypted file on Arweave.
 6. **Retrieve File:** Ensure the file's integrity and authenticity, completing the transfer.
 
 ## **5. Benefits**
 - **Privacy:** zkSNARK encryption guarantees that file contents remain confidential.
 - **Security:** Decentralized storage and cross-chain verification ensure data integrity and authenticity.
 - **Interoperability:** Wormhole bridge facilitates seamless and efficient cross-chain asset transfers.
-- **Scalability:** Leveraging Solana’s high-speed and low-cost transactions.
+- **Scalability:** Leveraging EVM’s high-speed and low-cost transactions.
 
 ## **6. Use Cases**
 - **Research Data Sharing:** Securely share sensitive research data across blockchain networks.
@@ -83,7 +83,7 @@ Traditional file transfer methods often suffer from privacy and security vulnera
 
 ### **7.2 Phase 2: Integration**
 - Develop tokenization process for file hashes.
-- Implement Wormhole bridge for cross-chain transfers between Sui and Solana.
+- Implement Wormhole bridge for cross-chain transfers between Sui and EVM.
 
 ### **7.3 Phase 3: Testing and Deployment**
 - Conduct thorough testing for security and efficiency.
@@ -130,16 +130,16 @@ Create a token representing the file hash. This involves wrapping the hash into 
 Use smart contracts to mint this token on the Sui network.
 
 ### Using the Wormhole Bridge:
-Wormhole is a cross-chain bridge that facilitates the transfer of tokenized assets between different blockchains, including Sui and Solana.
-The process involves locking the tokenized file hash on the Sui network and minting an equivalent token on the Solana network.
+Wormhole is a cross-chain bridge that facilitates the transfer of tokenized assets between different blockchains, including Sui and EVM.
+The process involves locking the tokenized file hash on the Sui network and minting an equivalent token on the EVM network.
 Guardians (validators) on the Wormhole network monitor the lock and mint actions to ensure they are synchronized across chains.
 
 ### Transmitting the Tokenized File Hash:
-Initiate the transfer of the tokenized file hash from the Sui network to the Solana network using the Wormhole bridge.
+Initiate the transfer of the tokenized file hash from the Sui network to the EVM network using the Wormhole bridge.
 The Wormhole protocol ensures the secure and verified transmission of the tokenized asset between networks.
 
-### Verification and Access on Solana:
-On the Solana side, the recipient can use the token to retrieve the file hash.
+### Verification and Access on EVM:
+On the EVM side, the recipient can use the token to retrieve the file hash.
 Verify the file hash against the encrypted file stored on Arweave to ensure integrity and authenticity.
 
 
