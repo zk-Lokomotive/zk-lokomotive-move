@@ -1,10 +1,10 @@
 {
-  "name": "sui-dapp-starter",
+  "name": "zk-lokomotive",
   "version": "0.0.0",
-  "description": "Full-Stack Sui Starter on Steroids",
+  "description": "Zk based fully secure and trustless multichain file transfer system.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kkomelin/sui-dapp-starter.git"
+    "url": "https://github.com/virjilakrum/zk-lokomotive-sui"
   },
   "scripts": {
     "dev": "pnpm frontend:dev",
@@ -66,15 +66,15 @@
     "node": ">=20"
   },
   "keywords": [
-    "sui",
-    "sui-dapp",
-    "sui-dapp-starter",
+    "lokomotive",
+    "zk",
+    "Wormhole",
     "sui-blockchain",
-    "sui-boilerplate",
+    "file",
     "blockchain",
-    "boilerplate",
-    "starter",
-    "starter-template"
+    "transfer",
+    "zk-lokomotive",
+    "sui"
   ],
   "license": "MIT",
   "workspaces": [
@@ -82,6 +82,20 @@
     "!**/test/**"
   ],
   "bugs": {
-    "url": "https://github.com/kkomelin/sui-dapp-starter/issues"
+    "url": "https://github.com/virjilakrum/zk-lokomotive-sui/issues"
+  }
+}
+{
+  "name": "move-contract-server",
+  "version": "1.0.0",
+  "description": "Server to interact with Move contracts",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "body-parser": "^1.19.0",
+    "axios": "^0.21.1"
   }
 }
