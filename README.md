@@ -15,7 +15,6 @@ Author: [Baturalp Güvenç](https://github.com/virjilakrum)
 </div>
 
 
-
 ### **Demo Video (Sui-Avalanche)**
 
 [Sui Demo](https://youtu.be/WpamMm3GP8U)
@@ -23,7 +22,7 @@ Author: [Baturalp Güvenç](https://github.com/virjilakrum)
 
 ## **Demo Video (Solana-Solana)**
 
-[[Solana Demo]](https://github.com/zk-Lokomotive/zk-lokomotive-wormhole/assets/158029357/81a7a8bb-0802-4158-8f48-fb1ddf4f5989)  
+[Solana Demo](https://youtu.be/zspxfSJNXbs)
 
 * Since we can fully integrate this into the crosschain in the future, this demo only represents file transfer with zk on the Solana network and support is received from [WebRTC](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API) ([signaling](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Signaling_and_video_calling)) for **P2P** communication.
 
