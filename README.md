@@ -1,5 +1,5 @@
 # zk-lokomotive Overflow
-* Zk based fully secure and trustless multichain file transfer system with Sui-EVM-Wormhole.
+* Zk based fully secure and trustless multichain file transfer system with Aptos-EVM-Wormhole.
 
 
 ### [Solana Renaissance Hackathon Wormhole Best Multichain Track Winner 1st 😎🥇](https://earn.superteam.fun/listings/hackathon/build-multichain-apps-using-wormhole/) 
@@ -14,25 +14,41 @@ Author: [Baturalp Güvenç](https://github.com/virjilakrum)
   <img src="https://github.com/zk-Lokomotive/zk-lokomotive-sui/assets/158029357/e9a98533-894e-4902-9e8c-539d86d0e764" alt="logo" width="200"/>
 </div>
 
+
+
 ### **Demo Video (Sui-Avalanche)**
 
-[WATCH THE DEMO VIDEO](https://youtu.be/WpamMm3GP8U)
+[Sui Demo](https://youtu.be/WpamMm3GP8U)
+
+
+## **Demo Video (Solana-Solana)**
+
+[[Solana Demo]](https://github.com/zk-Lokomotive/zk-lokomotive-wormhole/assets/158029357/81a7a8bb-0802-4158-8f48-fb1ddf4f5989)  
+
+* Since we can fully integrate this into the crosschain in the future, this demo only represents file transfer with zk on the Solana network and support is received from [WebRTC](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API) ([signaling](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Signaling_and_video_calling)) for **P2P** communication.
+
+
 ## **1. Introduction**
 ### **1.1 Project Overview**
-Our project aims to enable secure, private, and efficient file transfers across different blockchain networks. Utilizing zkSNARKs for encryption, Arweave for decentralized storage, and the Wormhole bridge for cross-chain token transfer, we ensure that files can be shared securely from Sui to EVM networks.
+Our project aims to enable secure, private, and efficient file transfers across different blockchain networks. Utilizing zkSNARKs for encryption, Arweave for decentralized storage, and the Wormhole bridge for cross-chain token transfer, we ensure that files can be shared securely from Aptos to EVM networks.
 
 ### **1.2 Problem Statement**
 Traditional file transfer methods often suffer from privacy and security vulnerabilities. Centralized servers are prone to data breaches, and current blockchain solutions lack seamless interoperability.
 
+## **1.3 Motivation:**
+
+Providing the amount of our data continues rapidly in the technological singularity. Traditional file formats often lack adequate privacy and security, especially when it comes to sensitive data. File services run on a central server, creating the risk of data breaches and privacy violations. We offer a different solution to this than traditional breaks, by combining the powerful capacities and polynomials of mathematics and the decentralized generality of Solana, thus challenging the trilemma.
+
 ## **2. Objectives**
 
 ### Demo Architecture
-![Architecture](https://github.com/zk-Lokomotive/zk-lokomotive-sui/assets/158029357/fac7287e-a440-4afe-95e6-6dd008811240)
+<img width="1147" alt="Ekran Resmi 2024-07-13 11 54 45" src="https://github.com/user-attachments/assets/737c865f-6109-41fe-92d1-790cea185605">
+
 
 - Encrypt files using zkSNARKs to ensure privacy and integrity.
 - Store encrypted files on Arweave with a unique file hash.
 - Tokenize the file hash for transfer across blockchain networks.
-- Utilize the Wormhole bridge to securely transfer tokenized assets from Sui to EVM.
+- Utilize the Wormhole bridge to securely transfer tokenized assets from Aptos to EVM.
 - Verify and retrieve the file on the receiving network, ensuring the file's integrity.
 
 ## **3. Technology Stack**
@@ -48,8 +64,8 @@ Traditional file transfer methods often suffer from privacy and security vulnera
 - **Purpose:** Cross-chain token transfer.
 - **Benefit:** Facilitates seamless and secure movement of tokenized assets between blockchain networks.
 
-### **3.4 Sui and EVM Networks**
-- **Sui Network:** Source network for initiating the file transfer.
+### **3.4 Aptos and EVM Networks**
+- **Aptos Network:** Source network for initiating the file transfer.
 - **EVM Network:** Destination network for receiving and verifying the file.
 
 ## **4. Process Workflow**
@@ -58,8 +74,8 @@ Traditional file transfer methods often suffer from privacy and security vulnera
 2. **Store on Arweave:** Upload the encrypted file to Arweave, obtaining a unique file hash.
 
 ### **4.2 Tokenization and Transfer**
-3. **Tokenize File Hash:** Create a token representing the file hash on the Sui network.
-4. **Initiate Transfer:** Use the Wormhole bridge to lock the token on Sui and mint an equivalent token on EVM.
+3. **Tokenize File Hash:** Create a token representing the file hash on the Aptos network.
+4. **Initiate Transfer:** Use the Wormhole bridge to lock the token on Aptos and mint an equivalent token on EVM.
 
 ### **4.3 Verification and Retrieval**
 5. **Verify on EVM:** The recipient verifies the file hash against the encrypted file on Arweave.
@@ -83,7 +99,7 @@ Traditional file transfer methods often suffer from privacy and security vulnera
 
 ### **7.2 Phase 2: Integration**
 - Develop tokenization process for file hashes.
-- Implement Wormhole bridge for cross-chain transfers between Sui and EVM.
+- Implement Wormhole bridge for cross-chain transfers between Aptos and EVM.
 
 ### **7.3 Phase 3: Testing and Deployment**
 - Conduct thorough testing for security and efficiency.
@@ -106,6 +122,22 @@ Our project offers a robust solution for secure cross-chain file transfers, addr
 - **Website:** [zk-lokomotive.xyz](https://zk-lokomotive.xyz)
 
 
+## **11. Links**
+•[Website](https://zk-lokomotive.xyz): https://zk-lokomotive.xyz
+•[Github](https://github.com/zk-Lokomotive): https://github.com/zk-Lokomotive
+•[Pitch Deck](https://www.youtube.com/watch?v=gQBXbDs-7BI ): https://www.youtube.com/watch?v=gQBXbDs-7BI (Sui-Avalanche)
+•[Demo Video](https://youtu.be/WpamMm3GP8U): https://youtu.be/WpamMm3GP8U
+
+
+## **12. Our Achievements**
+With our zk Lokomotive project between April and June:
+- Solana Foundation Mini Hackathon 1st place
+- Solana Foundation Demoday 2nd place
+- Solana Foundation Global Renaissance Multichain Track 1st Place
+- Sui Foundation Overflow Local Track 1st Place
+- EDCON2024 Super Demo Day (Japan) Finalist
+- Wormhole Foundation Grant
+- We were awarded the Solana Foundation Grant.
 ---
 
 ## **Appendix**
@@ -127,15 +159,15 @@ Upload the encrypted file to a decentralized storage solution like Arweave, obta
 
 ### Tokenizing the File Hash:
 Create a token representing the file hash. This involves wrapping the hash into a token that can be transferred across different blockchain networks.
-Use smart contracts to mint this token on the Sui network.
+Use smart contracts to mint this token on the Aptos network.
 
 ### Using the Wormhole Bridge:
-Wormhole is a cross-chain bridge that facilitates the transfer of tokenized assets between different blockchains, including Sui and EVM.
-The process involves locking the tokenized file hash on the Sui network and minting an equivalent token on the EVM network.
+Wormhole is a cross-chain bridge that facilitates the transfer of tokenized assets between different blockchains, including Aptos and EVM.
+The process involves locking the tokenized file hash on the Aptos network and minting an equivalent token on the EVM network.
 Guardians (validators) on the Wormhole network monitor the lock and mint actions to ensure they are synchronized across chains.
 
 ### Transmitting the Tokenized File Hash:
-Initiate the transfer of the tokenized file hash from the Sui network to the EVM network using the Wormhole bridge.
+Initiate the transfer of the tokenized file hash from the Aptos network to the EVM network using the Wormhole bridge.
 The Wormhole protocol ensures the secure and verified transmission of the tokenized asset between networks.
 
 ### Verification and Access on EVM:
@@ -148,15 +180,15 @@ Verify the file hash against the encrypted file stored on Arweave to ensure inte
 
 Before you begin, install the following:
 
-- [Sui prerequisites](https://docs.sui.io/build/install#prerequisites) (Sui prerequisites only)
-- [Suibase](https://suibase.io/how-to/install.html)
+- [Aptos prerequisites](https://docs.Aptos.io/build/install#prerequisites) (Aptos prerequisites only)
+- [Aptosbase](https://Aptosbase.io/how-to/install.html)
 - [Docker](https://docs.docker.com/engine/install/)
 - [Node (>= 20)](https://nodejs.org/en/download/)
 - [pnpm (>= 9)](https://pnpm.io/installation)
 
 
 ```bash
-pnpm create sui-dapp@latest
+pnpm create Aptos-dapp@latest
 ```
 
 ## Usage
@@ -165,7 +197,7 @@ name = "greeting"
 edition = "2024.beta" # edition = "legacy" to use legacy (pre-2024) Move
 
 [dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/devnet" }
+Aptos = { git = "https://github.com/MystenLabs/Aptos.git", subdir = "crates/Aptos-framework/packages/Aptos-framework", rev = "framework/devnet" }
 
  For remote import, use the `{ git = "...", subdir = "...", rev = "..." }`.
  Revision can be a branch, a tag, and a commit hash.
@@ -196,13 +228,13 @@ greeting = "0x0"
  alice = "0xB0B"
 
 
-#### 1. Run the local Sui network:
+#### 1. Run the local Aptos network:
 
 ```bash
 pnpm localnet:start
 ```
 
-Local Sui Explorer will be available on [localhost:9001](http://localhost:9001/)
+Local Aptos Explorer will be available on [localhost:9001](http://localhost:9001/)
 
 #### 2. Deploy the demo contract to the local network:
 
@@ -210,7 +242,7 @@ Local Sui Explorer will be available on [localhost:9001](http://localhost:9001/)
 pnpm localnet:deploy
 ```
 
-#### 3. Fund your localnet account via Sui Wallet or the faucet:
+#### 3. Fund your localnet account via Aptos Wallet or the faucet:
 
 ```bash
 pnpm localnet:faucet 0xYOURADDRESS
@@ -224,7 +256,7 @@ pnpm start
 
 ## Deployment (frontend)
 
-Follow [this guide](https://sui-dapp-starter.dev/docs/frontend/deployment/firebase) to deploy the frontend app to Firebase.
+Follow [this guide](https://Aptos-dapp-starter.dev/docs/frontend/deployment/firebase) to deploy the frontend app to Firebase.
 
 ### Firebase
 
