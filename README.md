@@ -20,9 +20,10 @@ Author: [Baturalp Güvenç](https://github.com/virjilakrum)
 [Sui Demo](https://youtu.be/WpamMm3GP8U)
 
 
-## **Demo Video (Solana-Solana)**
+### **Demo Video (Solana-Solana)**
 
 [Solana Demo](https://youtu.be/zspxfSJNXbs)
+
 
 * Since we can fully integrate this into the crosschain in the future, this demo only represents file transfer with zk on the Solana network and support is received from [WebRTC](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API) ([signaling](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Signaling_and_video_calling)) for **P2P** communication.
 
