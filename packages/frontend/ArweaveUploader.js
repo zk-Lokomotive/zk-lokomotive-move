@@ -1,58 +1,64 @@
 import React, { useState } from 'react';
-import { uploadFileToArweave } from '../utils/utils';
 import { useWallet } from '@manahippo/aptos-wallet-adapter';
 import { MovementClient } from '@movementlabs/movement-sdk';
+import { ethers } from 'ethers';
+import { uploadFileToArweave } from '../utils/arweaveUtils';
 
-const ArweaveUploader = () => {
+const ArweaveUploader = ({ evmAddress, movementClient }) => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [arweaveHash, setArweaveHash] = useState('');
-    const { account, signAndSubmitTransaction } = useWallet();
+    const [isUploading, setIsUploading] = useState(false);
+    const [error, setError] = useState('');
+    const { signAndSubmitTransaction } = useWallet();
 
     const handleFileChange = (event) => {
         setSelectedFile(event.target.files[0]);
+        setError('');
     };
 
     const handleUpload = async () => {
-        if (!selectedFile) return;
+        if (!selectedFile) {
+            setError('Lütfen bir dosya seçin.');
+            return;
+        }
+
+        setIsUploading(true);
+        setError('');
 
         try {
             const hash = await uploadFileToArweave(selectedFile);
             setArweaveHash(hash);
             console.log('Arweave hash:', hash);
-        } catch (error) {
-            console.error('Arweave yükleme hatası:', error);
-        }
-    };
 
-    const handleEncryptAndTransfer = async () => {
-        if (!arweaveHash || !account) return;
+            const payload = {
+                function: '0x1::FileTransfer::upload_to_arweave',
+                type_arguments: [],
+                arguments: [Date.now().toString(), hash],
+            };
 
-        const client = new MovementClient();
-        await client.initialize();
-
-        const payload = {
-            function: '0x1::FileTransfer::encrypt_and_transfer',
-            type_arguments: [],
-            arguments: [Date.now().toString(), arweaveHash],
-        };
-
-        try {
             const result = await signAndSubmitTransaction(payload);
             console.log('İşlem sonucu:', result);
+
         } catch (error) {
-            console.error('İşlem hatası:', error);
+            console.error('Yükleme hatası:', error);
+            setError('Dosya yüklenirken bir hata oluştu.');
+        } finally {
+            setIsUploading(false);
         }
     };
 
     return (
         <div>
-            <input type="file" onChange={handleFileChange} />
-            <button onClick={handleUpload}>Arweave'e Yükle</button>
+            <h2>Arweave'e Dosya Yükle</h2>
+            <input type="file" onChange={handleFileChange} disabled={isUploading} />
+            <button onClick={handleUpload} disabled={!selectedFile || isUploading}>
+                {isUploading ? 'Yükleniyor...' : 'Yükle'}
+            </button>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
             {arweaveHash && (
-                <>
+                <div>
                     <p>Arweave Hash: {arweaveHash}</p>
-                    <button onClick={handleEncryptAndTransfer}>Şifrele ve Transfer Et</button>
-                </>
+                </div>
             )}
         </div>
     );
