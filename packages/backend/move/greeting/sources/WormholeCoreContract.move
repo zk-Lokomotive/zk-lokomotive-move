@@ -1,10 +1,12 @@
 module WormholeCore {
-
     use 0x1::Signer;
     use 0x1::Event;
     use 0x1::Vector;
     use 0x1::Hash;
+    use 0x1::Errors;
+    use 0x1::BCS;
 
+    /// Published message structure
     struct PublishedMessage has key {
         nonce: u64,
         payload: vector<u8>,
@@ -13,6 +15,7 @@ module WormholeCore {
         emitter_address: address,
     }
 
+    /// Verified VAA (Verifiable Action Approval) structure
     struct VerifiedVAA has key {
         vaa: vector<u8>,
         emitter_address: address,
@@ -20,7 +23,22 @@ module WormholeCore {
         sequence_number: u64,
     }
 
-    event PublishedEvent {
+    /// Wormhole configuration structure
+    struct WormholeConfig has key {
+        guardian_set_index: u32,
+        guardian_addresses: vector<address>,
+        message_fee: u64,
+    }
+
+    /// Arweave hash structure
+    struct ArweaveHash has key {
+        hash: vector<u8>,
+        emitter_chain: u16,
+        sequence_number: u64,
+    }
+
+    /// Message publishing event
+    struct PublishedEvent has drop, store {
         nonce: u64,
         payload: vector<u8>,
         consistency_level: u8,
@@ -28,8 +46,44 @@ module WormholeCore {
         emitter_address: address,
     }
 
-    public fun publish_message(signer: &signer, nonce: u64, payload: vector<u8>, consistency_level: u8): u64 {
+    /// Guardian set update event
+    struct GuardianSetUpdated has drop, store {
+        new_index: u32,
+        new_guardians: vector<address>,
+    }
+
+    /// Arweave hash publishing event
+    struct ArweaveHashPublished has drop, store {
+        hash: vector<u8>,
+        emitter_chain: u16,
+        sequence_number: u64,
+    }
+
+    /// Error codes
+    const E_NOT_INITIALIZED: u64 = 1;
+    const E_ALREADY_INITIALIZED: u64 = 2;
+    const E_INVALID_GUARDIAN_SET: u64 = 3;
+    const E_INSUFFICIENT_FEE: u64 = 4;
+    const E_INVALID_VAA: u64 = 5;
+
+    /// Start wormhole core contract
+    public fun initialize(account: &signer, initial_guardians: vector<address>, initial_fee: u64) {
+        let account_addr = Signer::address_of(account);
+        assert!(!exists<WormholeConfig>(account_addr), Errors::already_exists(E_ALREADY_INITIALIZED));
+
+        move_to(account, WormholeConfig {
+            guardian_set_index: 0,
+            guardian_addresses: initial_guardians,
+            message_fee: initial_fee,
+        });
+    }
+
+    /// Post a new message
+    public fun publish_message(signer: &signer, nonce: u64, payload: vector<u8>, consistency_level: u8): u64 acquires WormholeConfig {
         let emitter_address = Signer::address_of(signer);
+        let config = borrow_global<WormholeConfig>(emitter_address);
+        assert!(Signer::balance(signer) >= config.message_fee, Errors::invalid_argument(E_INSUFFICIENT_FEE));
+
         let sequence_number = generate_sequence_number(emitter_address);
 
         let message = PublishedMessage {
@@ -42,26 +96,25 @@ module WormholeCore {
 
         move_to(signer, message);
 
-        emit PublishedEvent {
+        Event::emit(PublishedEvent {
             nonce: nonce,
             payload: payload,
             consistency_level: consistency_level,
             sequence_number: sequence_number,
             emitter_address: emitter_address,
-        };
+        });
 
         sequence_number
     }
 
-    public fun verify_vaa(signer: &signer, vaa: vector<u8>): VerifiedVAA {
-        let vaa_data = parse_and_verify_vaa(vaa);
-        let VerifiedVAA { emitter_address, payload, sequence_number } = vaa_data;
-
+    /// Verify VAA
+    public fun verify_vaa(signer: &signer, vaa: vector<u8>): VerifiedVAA acquires WormholeConfig {
+        let vaa_data = parse_and_verify_vaa(signer, vaa);
         let verified_message = VerifiedVAA {
             vaa: vaa,
-            emitter_address: emitter_address,
-            payload: payload,
-            sequence_number: sequence_number,
+            emitter_address: vaa_data.emitter_address,
+            payload: vaa_data.payload,
+            sequence_number: vaa_data.sequence_number,
         };
 
         move_to(signer, verified_message);
@@ -69,24 +122,86 @@ module WormholeCore {
         verified_message
     }
 
-    fun generate_sequence_number(emitter_address: address): u64 {
-        // Simulate sequence number generation
-        let sequence_number = 1; // This should be replaced with actual logic to generate sequence numbers
+    /// Publish Arweave hash
+    public fun publish_arweave_hash(signer: &signer, hash: vector<u8>, emitter_chain: u16): u64 acquires WormholeConfig {
+        let sequence_number = publish_message(signer, 0, hash, 1); // consistency_level 1 kullan
+
+        let arweave_hash = ArweaveHash {
+            hash: hash,
+            emitter_chain: emitter_chain,
+            sequence_number: sequence_number,
+        };
+
+        move_to(signer, arweave_hash);
+
+        Event::emit(ArweaveHashPublished {
+            hash: hash,
+            emitter_chain: emitter_chain,
+            sequence_number: sequence_number,
+        });
+
         sequence_number
     }
 
-    fun parse_and_verify_vaa(vaa: vector<u8>): VerifiedVAA {
-    fun parse_and_verify_vaa(vaa: vector<u8>): VerifiedVAA {
-        // Parse the VAA (Verifiable Action Approval)
+    /// Update Guardian set
+    public fun update_guardian_set(account: &signer, new_guardians: vector<address>) acquires WormholeConfig {
+        let account_addr = Signer::address_of(account);
+        assert!(exists<WormholeConfig>(account_addr), Errors::not_found(E_NOT_INITIALIZED));
+
+        let config = borrow_global_mut<WormholeConfig>(account_addr);
+        assert!(Vector::length(&new_guardians) > 0, Errors::invalid_argument(E_INVALID_GUARDIAN_SET));
+
+        config.guardian_set_index = config.guardian_set_index + 1;
+        config.guardian_addresses = new_guardians;
+
+        Event::emit(GuardianSetUpdated {
+            new_index: config.guardian_set_index,
+            new_guardians: new_guardians,
+        });
+    }
+
+    /// Update message cost
+    public fun update_message_fee(account: &signer, new_fee: u64) acquires WormholeConfig {
+        let account_addr = Signer::address_of(account);
+        assert!(exists<WormholeConfig>(account_addr), Errors::not_found(E_NOT_INITIALIZED));
+
+        let config = borrow_global_mut<WormholeConfig>(account_addr);
+        config.message_fee = new_fee;
+    }
+
+    /// Bring the Guardian set
+    public fun get_guardian_set(account_addr: address): (u32, vector<address>) acquires WormholeConfig {
+        let config = borrow_global<WormholeConfig>(account_addr);
+        (config.guardian_set_index, *&config.guardian_addresses)
+    }
+
+    /// Get message fee
+    public fun get_message_fee(account_addr: address): u64 acquires WormholeConfig {
+        borrow_global<WormholeConfig>(account_addr).message_fee
+    }
+
+    /// Create serial number
+    fun generate_sequence_number(emitter_address: address): u64 {
+
+// This function should be more complex in a full version of implementation 🏗️
+// For now we are doing a simple dummy simulation 🏗️🤡
+
+        let sequence_number = 1; // Gerçek bir implementasyonda bu, son kullanılan sıra numarasını takip etmeli
+        sequence_number
+    }
+
+    /// Parse and verify VAA
+    fun parse_and_verify_vaa(signer: &signer, vaa: vector<u8>): VerifiedVAA acquires WormholeConfig {
         let guardian_signatures = extract_guardian_signatures(vaa);
         let payload = extract_payload(vaa);
-        let sequence_number = extract_sequence_number(payload);
-        let emitter_address = extract_emitter_address(payload);
+        let sequence_number = extract_sequence_number(&payload);
+        let emitter_address = extract_emitter_address(&payload);
 
-        // Verify the guardian signatures
-        assert!(verify_guardian_signatures(guardian_signatures, payload), 1);
+        let signer_addr = Signer::address_of(signer);
+        let config = borrow_global<WormholeConfig>(signer_addr);
 
-        // If verification passes, return the parsed VAA data
+        assert!(verify_guardian_signatures(&guardian_signatures, &payload, &config.guardian_addresses), Errors::invalid_argument(E_INVALID_VAA));
+
         VerifiedVAA {
             vaa: vaa,
             emitter_address: emitter_address,
@@ -95,53 +210,39 @@ module WormholeCore {
         }
     }
 
-    // Function to extract guardian signatures from the VAA
-    fun extract_guardian_signatures(vaa: vector<u8>): vector<u8> {
-        // Assuming the guardian signatures are located at the start of the VAA
-        let signature_length = 65; // Placeholder value, actual length may vary
-        let num_signatures = 19; // Placeholder value, actual number of guardians
-        Vector::sub_vector(vaa, 0, signature_length * num_signatures)
+    /// Remove Guardian signatures
+    fun extract_guardian_signatures(vaa: &vector<u8>): vector<u8> {
+        let signature_length = 65;
+        let num_signatures = 19; // Bu değer, gerçek implementasyonda dinamik olmalıdır
+        Vector::slice(vaa, 0, signature_length * num_signatures)
     }
 
-    // Function to extract the payload from the VAA
-    fun extract_payload(vaa: vector<u8>): vector<u8> {
-        // Assuming the payload is located after the guardian signatures
-        let signature_length = 65; // Placeholder value, actual length may vary
-        let num_signatures = 19; // Placeholder value, actual number of guardians
+    /// Extract the payload
+    fun extract_payload(vaa: &vector<u8>): vector<u8> {
+        let signature_length = 65;
+        let num_signatures = 19; // Bu değer, gerçek implementasyonda dinamik olmalıdır
         let payload_start = signature_length * num_signatures;
-        Vector::sub_vector(vaa, payload_start, Vector::length(vaa) - payload_start)
+        Vector::slice(vaa, payload_start, Vector::length(vaa) - payload_start)
     }
 
-    // Function to extract the sequence number from the payload
-    fun extract_sequence_number(payload: vector<u8>): u64 {
-        // Assuming the sequence number is located at a specific position in the payload
-        let sequence_number_position = 0; // Placeholder value, actual position may vary
-        let sequence_number_bytes = Vector::sub_vector(payload, sequence_number_position, 8);
-        bcs::from_bytes<u64>(sequence_number_bytes)
+    /// Remove serial number
+    fun extract_sequence_number(payload: &vector<u8>): u64 {
+        let sequence_number_position = 0; // Gerçek pozisyon farklı olabilir
+        let sequence_number_bytes = Vector::slice(payload, sequence_number_position, 8);
+        BCS::to_u64(&sequence_number_bytes)
     }
 
-    // Function to extract the emitter address from the payload
-    fun extract_emitter_address(payload: vector<u8>): address {
-        // Assuming the emitter address is located at a specific position in the payload
-        let emitter_address_position = 8; // Placeholder value, actual position may vary
-        let emitter_address_bytes = Vector::sub_vector(payload, emitter_address_position, 32);
-        bcs::from_bytes<address>(emitter_address_bytes)
+    /// Remove the publisher address
+    fun extract_emitter_address(payload: &vector<u8>): address {
+        let emitter_address_position = 8; // Gerçek pozisyon farklı olabilir
+        let emitter_address_bytes = Vector::slice(payload, emitter_address_position, 32);
+        BCS::to_address(&emitter_address_bytes)
     }
 
-    // Function to verify the guardian signatures
-    fun verify_guardian_signatures(signatures: vector<u8>, payload: vector<u8>): bool {
-        // Placeholder logic for verifying the signatures
-        true
-    }
-        let emitter_address = 0x1::Signer::address_of();
-        let payload = b"sample payload";
-        let sequence_number = 1;
-
-        VerifiedVAA {
-            vaa: vaa,
-            emitter_address: emitter_address,
-            payload: payload,
-            sequence_number: sequence_number,
-        }
+    /// Verify Guardian signatures
+    fun verify_guardian_signatures(signatures: &vector<u8>, payload: &vector<u8>, guardian_addresses: &vector<address>): bool {
+        // Bu fonksiyon, gerçek bir implementasyonda çok daha karmaşık olmalıdır
+        // Şu an için basit bir doğrulama yapıyoruz
+        true // Gerçek implementasyonda, imzaları ve payload'ı doğrulamalıyız
     }
 }
