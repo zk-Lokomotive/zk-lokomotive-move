@@ -5,7 +5,6 @@ import { useWallet } from "@manahippo/aptos-wallet-adapter";
 import { MovementClient } from "@movementlabs/movement-sdk";
 import { ethers } from "ethers";
 import ArweaveUploader from '../components/ArweaveUploader';
-import WormholeTransfer from '../components/WormholeTransfer';
 
 export default function Home() {
     const [isConnected, setIsConnected] = useState(false);
@@ -61,7 +60,6 @@ export default function Home() {
                         <p>Bağlı EVM Adresi: {evmAddress}</p>
                         <button onClick={disconnectWallet}>Cüzdanı Ayır</button>
                         <ArweaveUploader evmAddress={evmAddress} movementClient={movementClient} />
-                        <WormholeTransfer evmAddress={evmAddress} movementClient={movementClient} />
                     </div>
                 )}
             </main>
