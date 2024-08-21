@@ -6,6 +6,7 @@ module FileTransfer {
     use 0x1::Event;
     use 0x1::Timestamp;
     use 0x1::Vector;
+    use 0x1::WormholeSDK;
 
     struct EncryptedFile has store {
         id: u64,
@@ -42,6 +43,13 @@ module FileTransfer {
         owner: address,
         token_hash: vector<u8>,
         message_hash: vector<u8>,
+        timestamp: u64,
+    }
+
+    struct ArweaveUploadEvent has store {
+        file_id: u64,
+        owner: address,
+        arweave_hash: vector<u8>,
         timestamp: u64,
     }
 
@@ -142,5 +150,44 @@ module FileTransfer {
 
     public fun store_on_arweave(encrypted_data: vector<u8>): vector<u8> {
         Hash::sha3_256(encrypted_data)
+    }
+
+    public fun upload_to_arweave(account: &signer, file_id: u64, arweave_hash: vector<u8>) {
+        let owner = Signer::address_of(account);
+        let timestamp = Timestamp::now_seconds();
+
+        let arweave_upload_event = ArweaveUploadEvent {
+            file_id: file_id,
+            owner: owner,
+            arweave_hash: arweave_hash,
+            timestamp: timestamp,
+        };
+        Event::emit_event(arweave_upload_event);
+    }
+
+    public fun encrypt_and_transfer(account: &signer, file_id: u64, arweave_hash: vector<u8>) {
+        let owner = Signer::address_of(account);
+        let encrypted_hash = Hash::sha3_256(arweave_hash);
+        
+        // Wormhole mesajı oluştur
+        let wormhole_message = WormholeSDK::create_message(encrypted_hash);
+        
+        // Aptos'a gönder
+        WormholeSDK::send_message(wormhole_message, WormholeSDK::CHAIN_ID_APTOS);
+        
+        // Sui'ye gönder
+        WormholeSDK::send_message(wormhole_message, WormholeSDK::CHAIN_ID_SUI);
+        
+        // EVM'ye gönder
+        WormholeSDK::send_message(wormhole_message, WormholeSDK::CHAIN_ID_ETH);
+
+        let wormhole_message_event = WormholeMessageEvent {
+            file_id: file_id,
+            owner: owner,
+            token_hash: encrypted_hash,
+            message_hash: Hash::sha3_256(wormhole_message),
+            timestamp: Timestamp::now_seconds(),
+        };
+        Event::emit_event(wormhole_message_event);
     }
 }
