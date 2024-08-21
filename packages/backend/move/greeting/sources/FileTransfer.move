@@ -8,7 +8,7 @@ module FileTransfer {
     use 0x1::Vector;
     use 0x1::WormholeSDK;
 
-    struct EncryptedFile has store {
+    struct EncryptedFile has key, store {
         id: u64,
         owner: address,
         encrypted_data: vector<u8>,
@@ -16,14 +16,14 @@ module FileTransfer {
         timestamp: u64,
     }
 
-    struct TokenizedFileHash has store {
+    struct TokenizedFileHash has key, store {
         file_id: u64,
         owner: address,
         token_hash: vector<u8>,
         timestamp: u64,
     }
 
-    struct FileEncryptionEvent has store {
+    struct FileEncryptionEvent has drop, store {
         file_id: u64,
         owner: address,
         encrypted_data: vector<u8>,
@@ -31,14 +31,14 @@ module FileTransfer {
         timestamp: u64,
     }
 
-    struct TokenizationEvent has store {
+    struct TokenizationEvent has drop, store {
         file_id: u64,
         owner: address,
         token_hash: vector<u8>,
         timestamp: u64,
     }
 
-    struct WormholeMessageEvent has store {
+    struct WormholeMessageEvent has drop, store {
         file_id: u64,
         owner: address,
         token_hash: vector<u8>,
@@ -46,14 +46,14 @@ module FileTransfer {
         timestamp: u64,
     }
 
-    struct ArweaveUploadEvent has store {
+    struct ArweaveUploadEvent has drop, store {
         file_id: u64,
         owner: address,
         arweave_hash: vector<u8>,
         timestamp: u64,
     }
 
-    public fun encrypt_file(account: &signer, file_id: u64, raw_data: vector<u8>): EncryptedFile {
+    public fun encrypt_file(account: &signer, file_id: u64, raw_data: vector<u8>): EncryptedFile acquires EncryptedFile {
         let owner = Signer::address_of(account);
         let encrypted_data = zkSNARKs_encrypt(raw_data);
         let arweave_hash = store_on_arweave(encrypted_data);
@@ -75,15 +75,15 @@ module FileTransfer {
             arweave_hash: arweave_hash,
             timestamp: timestamp,
         };
-        Event::emit_event(encryption_event);
+        Event::emit(encryption_event);
 
-        encrypted_file
+        *borrow_global<EncryptedFile>(owner)
     }
 
-    public fun tokenize_file_hash(account: &signer, file_id: u64) {
+    public fun tokenize_file_hash(account: &signer, file_id: u64) acquires EncryptedFile, TokenizedFileHash {
         let owner = Signer::address_of(account);
-        let encrypted_file = borrow_global<EncryptedFile>(file_id);
-        assert!(encrypted_file.owner == owner, 1);
+        let encrypted_file = borrow_global<EncryptedFile>(owner);
+        assert!(encrypted_file.id == file_id, 1);
 
         let token_hash = Hash::sha3_256(encrypted_file.arweave_hash);
         let timestamp = Timestamp::now_seconds();
@@ -102,15 +102,15 @@ module FileTransfer {
             token_hash: token_hash,
             timestamp: timestamp,
         };
-        Event::emit_event(tokenization_event);
+        Event::emit(tokenization_event);
     }
 
-    public fun transfer_token_via_wormhole(account: &signer, file_id: u64) {
+    public fun transfer_token_via_wormhole(account: &signer, file_id: u64) acquires TokenizedFileHash {
         let owner = Signer::address_of(account);
-        let tokenized_file = borrow_global<TokenizedFileHash>(file_id);
-        assert!(tokenized_file.owner == owner, 1);
+        let tokenized_file = borrow_global<TokenizedFileHash>(owner);
+        assert!(tokenized_file.file_id == file_id, 1);
 
-        let message_hash = Hash::keccak256(TokenizedFileHash::serialize(&tokenized_file));
+        let message_hash = Hash::sha3_256(Vector::empty<u8>()); // TokenizedFileHash serileştirmesi burada yapılmalı
         let timestamp = Timestamp::now_seconds();
 
         let wormhole_message_event = WormholeMessageEvent {
@@ -120,35 +120,35 @@ module FileTransfer {
             message_hash: message_hash,
             timestamp: timestamp,
         };
-        Event::emit_event(wormhole_message_event);
-
-
+        Event::emit(wormhole_message_event);
     }
 
-    public fun verify_and_retrieve_file(account: &signer, file_id: u64, token_hash: vector<u8>, message_hash: vector<u8>) {
+    public fun verify_and_retrieve_file(account: &signer, file_id: u64, token_hash: vector<u8>, message_hash: vector<u8>) acquires TokenizedFileHash, EncryptedFile {
         let owner = Signer::address_of(account);
-        let tokenized_file = borrow_global<TokenizedFileHash>(file_id);
+        let tokenized_file = borrow_global<TokenizedFileHash>(owner);
         assert!(tokenized_file.token_hash == token_hash, 1);
 
-        // Guardian Network ile mesaj doğrulama
+        // Guardian Network ile mesaj doğrulama burada yapılmalı
 
-        let encrypted_file = borrow_global<EncryptedFile>(file_id);
-        assert!(encrypted_file.arweave_hash == token_hash, 2);
+        let encrypted_file = borrow_global<EncryptedFile>(owner);
+        assert!(encrypted_file.id == file_id, 2);
 
-        let decrypted_data = zkSNARKs_decrypt(encrypted_file.encrypted_data);
-        
-
+        let _decrypted_data = zkSNARKs_decrypt(encrypted_file.encrypted_data);
+        // Çözülen veri burada işlenebilir
     }
 
-    public fun zkSNARKs_encrypt(data: vector<u8>): vector<u8> {
+    fun zkSNARKs_encrypt(data: vector<u8>): vector<u8> {
+        // Gerçek zk-SNARK şifreleme burada uygulanmalı
         data
     }
 
-    public fun zkSNARKs_decrypt(encrypted_data: vector<u8>): vector<u8> {
+    fun zkSNARKs_decrypt(encrypted_data: vector<u8>): vector<u8> {
+        // Gerçek zk-SNARK çözme burada uygulanmalı
         encrypted_data
     }
 
-    public fun store_on_arweave(encrypted_data: vector<u8>): vector<u8> {
+    fun store_on_arweave(encrypted_data: vector<u8>): vector<u8> {
+        // Gerçek Arweave depolama burada uygulanmalı
         Hash::sha3_256(encrypted_data)
     }
 
@@ -162,23 +162,17 @@ module FileTransfer {
             arweave_hash: arweave_hash,
             timestamp: timestamp,
         };
-        Event::emit_event(arweave_upload_event);
+        Event::emit(arweave_upload_event);
     }
 
     public fun encrypt_and_transfer(account: &signer, file_id: u64, arweave_hash: vector<u8>) {
         let owner = Signer::address_of(account);
         let encrypted_hash = Hash::sha3_256(arweave_hash);
         
-        // Wormhole mesajı oluştur
         let wormhole_message = WormholeSDK::create_message(encrypted_hash);
         
-        // Aptos'a gönder
         WormholeSDK::send_message(wormhole_message, WormholeSDK::CHAIN_ID_APTOS);
-        
-        // Sui'ye gönder
         WormholeSDK::send_message(wormhole_message, WormholeSDK::CHAIN_ID_SUI);
-        
-        // EVM'ye gönder
         WormholeSDK::send_message(wormhole_message, WormholeSDK::CHAIN_ID_ETH);
 
         let wormhole_message_event = WormholeMessageEvent {
@@ -188,6 +182,6 @@ module FileTransfer {
             message_hash: Hash::sha3_256(wormhole_message),
             timestamp: Timestamp::now_seconds(),
         };
-        Event::emit_event(wormhole_message_event);
+        Event::emit(wormhole_message_event);
     }
 }
