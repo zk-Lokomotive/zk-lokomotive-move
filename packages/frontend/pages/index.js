@@ -1,16 +1,50 @@
 import Head from "next/head";
-import TitleCard from "components/TitleCard/titleCard.js";
 import Layout from "components/layout.js";
-import Core from "components/core/core.js";
-import CoreDBG from 'components/coredbg/coredbg.js';
-import LinkCard from "components/LinkCard/linkCard.js";
-import { flags } from "socket.io/lib/namespace";
-import WalletConnectionButton from "components/walletConnBtn/WalletConnectionButton";
-import SelectNetworkThing from "components/SelectNetworkThing/SelectNetworkThing";
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
+import { useWallet } from "@manahippo/aptos-wallet-adapter";
+import { MovementClient } from "@movementlabs/movement-sdk";
+import { ethers } from "ethers";
 import ArweaveUploader from '../components/ArweaveUploader';
+import WormholeTransfer from '../components/WormholeTransfer';
 
 export default function Home() {
+    const [isConnected, setIsConnected] = useState(false);
+    const [evmAddress, setEvmAddress] = useState("");
+    const { account, connect, disconnect } = useWallet();
+    const [movementClient, setMovementClient] = useState(null);
+
+    useEffect(() => {
+        const initializeMovementClient = async () => {
+            const client = new MovementClient();
+            await client.initialize();
+            setMovementClient(client);
+        };
+
+        initializeMovementClient();
+    }, []);
+
+    const connectWallet = async () => {
+        if (typeof window.ethereum !== 'undefined') {
+            try {
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                const address = await signer.getAddress();
+                setEvmAddress(address);
+                setIsConnected(true);
+            } catch (error) {
+                console.error("Cüzdan bağlantı hatası:", error);
+            }
+        } else {
+            console.error("MetaMask yüklü değil!");
+        }
+    };
+
+    const disconnectWallet = () => {
+        setIsConnected(false);
+        setEvmAddress("");
+    };
+
     return (
         <Layout>
             <Head>
@@ -19,44 +53,17 @@ export default function Home() {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             </Head>
             <main>
-                <div className="header">
-                    <SelectNetworkThing />
-                    <TitleCard
-                        title="zk-Lokomotive"
-                        text="Cross chain file transfer, powered by"
-                    />
-                    <div className="wallet-button-container">
-                        <WalletConnectionButton
-                            onclick={() => {
-                                this.setState({ refresh: !this.state.refresh });
-                            }}
-                        />
-                        <a
-                            href="https://github.com/virjilakrum/zk-lokomotive"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <button>Github zk-Lokomotive</button>
-                        </a>
+                <h1>zk-Lokomotive: Cross-Chain Dosya Transferi</h1>
+                {!isConnected ? (
+                    <button onClick={connectWallet}>EVM Cüzdanı Bağla</button>
+                ) : (
+                    <div>
+                        <p>Bağlı EVM Adresi: {evmAddress}</p>
+                        <button onClick={disconnectWallet}>Cüzdanı Ayır</button>
+                        <ArweaveUploader evmAddress={evmAddress} movementClient={movementClient} />
+                        <WormholeTransfer evmAddress={evmAddress} movementClient={movementClient} />
                     </div>
-                </div>
-                <div
-                    className="fifty-grid center col-mobile  d-flex flex-wrap justify-center"
-                    style={{
-                        color: "#FEFFAF",
-                        display: "block",
-                        justifyContent: "center",
-                        width: "100%",
-                        height: "100%",
-                        overflow: "hidden"
-                    }}
-                >
-                    <Core />
-                </div>
-                <div>
-                    <h1>Arweave Uploader ve Cross-Chain Transfer</h1>
-                    <ArweaveUploader />
-                </div>
+                )}
             </main>
         </Layout>
     );
